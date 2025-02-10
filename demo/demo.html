@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Galactic Defense Simulation</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    // Get the canvas and context
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+
+    // Game state
+    let score = 0;
+    let gameOver = false;
+
+    // Player settings
+    const playerWidth = 64, playerHeight = 64;
+    let playerX = WIDTH / 2 - playerWidth / 2;
+    const playerY = HEIGHT - playerHeight - 10;
+    let playerXChange = 0;
+    const playerSpeed = 8;
+
+    // Enemy settings
+    const enemyWidth = 64, enemyHeight = 64;
+    const numEnemies = 10;
+    const enemies = [];
+    for (let i = 0; i < numEnemies; i++) {
+      const enemyX = Math.random() * (WIDTH - enemyWidth);
+      const enemyY = 50 + Math.random() * 100; // random between 50 and 150
+      const enemyXChange = 1; // initial speed/direction
+      enemies.push({ x: enemyX, y: enemyY, xChange: enemyXChange });
+    }
+
+    // Bullet settings
+    const bulletWidth = 40, bulletHeight = 40;
+    let bulletX = 0;
+    let bulletY = playerY;
+    const bulletSpeed = 5;
+    let bulletState = "ready"; // "ready" means ready to fire, "fire" means bullet is moving
+
+    // Listen for keydown events for movement and shooting
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        playerXChange = -playerSpeed;
+      } else if (e.key === 'ArrowRight') {
+        playerXChange = playerSpeed;
+      } else if (e.key === ' ' || e.key === 'Spacebar') {
+        // Fire bullet if ready
+        if (bulletState === "ready") {
+          bulletX = playerX + playerWidth / 2 - bulletWidth / 2;
+          bulletY = playerY;
+          bulletState = "fire";
+        }
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        playerXChange = 0;
+      }
+    });
+
+    // Collision detection between a rectangle (bullet) and an enemy rectangle
+    function isCollision(enemy, bulletX, bulletY) {
+      return (
+        bulletX < enemy.x + enemyWidth &&
+        bulletX + bulletWidth > enemy.x &&
+        bulletY < enemy.y + enemyHeight &&
+        bulletY + bulletHeight > enemy.y
+      );
+    }
+
+    // Drawing functions
+    function drawPlayer() {
+      ctx.fillStyle = "white";
+      ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+    }
+
+    function drawEnemy(enemy) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(enemy.x, enemy.y, enemyWidth, enemyHeight);
+    }
+
+    function drawBullet() {
+      if (bulletState === "fire") {
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(bulletX, bulletY, bulletWidth, bulletHeight);
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "blue";
+      ctx.font = "32px Arial";
+      ctx.fillText("Score: " + score, 10, 40);
+    }
+
+    function drawLevelMessage() {
+      ctx.fillStyle = "lightblue";
+      ctx.font = "64px Arial";
+      if (score === 100) {
+        ctx.fillText("Level 2", WIDTH / 2 - 100, HEIGHT / 2);
+      } else if (score === 200) {
+        ctx.fillText("Level 3", WIDTH / 2 - 100, HEIGHT / 2);
+      } else if (score === 300) {
+        ctx.fillText("Level 4", WIDTH / 2 - 100, HEIGHT / 2);
+      } else if (score === 400) {
+        ctx.fillText("Winner", WIDTH / 2 - 100, HEIGHT / 2);
+        gameOver = true;
+      }
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = "red";
+      ctx.font = "64px Arial";
+      ctx.fillText("GAME OVER", WIDTH / 2 - 150, HEIGHT / 2);
+    }
+
+    // Main game loop using requestAnimationFrame
+    function update() {
+      // Clear the canvas
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      // Update player position
+      playerX += playerXChange;
+      if (playerX < 0) playerX = 0;
+      if (playerX > WIDTH - playerWidth) playerX = WIDTH - playerWidth;
+
+      // Update bullet position if fired
+      if (bulletState === "fire") {
+        bulletY -= bulletSpeed;
+        if (bulletY < 0) {
+          bulletState = "ready";
+          bulletY = playerY;
+        }
+      }
+
+      // Update enemies
+      for (let enemy of enemies) {
+        enemy.x += enemy.xChange;
+        // Change direction and move enemy down on boundary hit
+        if (enemy.x <= 0) {
+          enemy.xChange = 1;
+          enemy.y += 40;
+        } else if (enemy.x >= WIDTH - enemyWidth) {
+          enemy.xChange = -1;
+          enemy.y += 40;
+        }
+
+        // Check collision with bullet
+        if (bulletState === "fire" && isCollision(enemy, bulletX, bulletY)) {
+          bulletState = "ready";
+          bulletY = playerY;
+          score += 1;
+          // Reset enemy to a new random position
+          enemy.x = Math.random() * (WIDTH - enemyWidth);
+          enemy.y = 50 + Math.random() * 100;
+          enemy.xChange = Math.random() < 0.5 ? -1 : 1;
+        }
+
+        // If enemy goes below the canvas, end the game
+        if (enemy.y > HEIGHT - enemyHeight) {
+          gameOver = true;
+        }
+      }
+
+      // Draw game objects
+      drawPlayer();
+      enemies.forEach(drawEnemy);
+      drawBullet();
+      drawScore();
+      drawLevelMessage();
+
+      // Display game over message if game is over
+      if (gameOver) {
+        drawGameOver();
+      } else {
+        requestAnimationFrame(update);
+      }
+    }
+
+    // Start the game loop
+    update();
+  </script>
+</body>
+</html>
