@@ -15,7 +15,7 @@
 - [Command-Line Options](#command-line-options)
 - [Code Overview](#code-overview)
 - [Credits](#credits)
-
+- [Demo](http://natuworkguy.github.io/NNOSGames-Galactic-Defense/demo/)
 ---
 
 ## Features
