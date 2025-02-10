@@ -15,7 +15,6 @@
 - [Command-Line Options](#command-line-options)
 - [Code Overview](#code-overview)
 - [Credits](#credits)
-- [License](#license)
 
 ---
 
