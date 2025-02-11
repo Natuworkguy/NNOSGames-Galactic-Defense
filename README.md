@@ -1,5 +1,5 @@
 # Galactic Defense
-### NNOS Games presents: Galactic Defense: The new game that is free-to play, but still fun-to-play!
+### NNOS Games presents: Galactic Defense: The new game that is free-to-play, but still fun-to-play!
 
 **Galactic Defense** is a simple 2D arcade-style shooter game built with Python and [Pygame](https://www.pygame.org/). In this game, you control a player that moves horizontally along the bottom of the screen. Your objective is to shoot down incoming enemy ships before they reach you. With a nostalgic vibe reminiscent of classic arcade shooters, Galactic Defense offers fast-paced action and a straightforward gameplay experience.
 
